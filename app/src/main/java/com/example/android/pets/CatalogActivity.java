@@ -104,11 +104,27 @@ public class CatalogActivity extends AppCompatActivity {
         // Perform this raw SQL query "SELECT * FROM pets"
         Cursor cursor = db.query( PestsContract.PetEntry.TABLE_NAME,null,null,null,null,null,null);
 
+        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
+
         try {
-            // Display the number of rows in the Cursor (which reflects the number of rows in the
-            // pets table in the database).
-            TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-            displayView.setText("Number of rows in pets database table: " + cursor.getCount());
+            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
+            displayView.append(PestsContract.PetEntry._ID + " - " +
+                    PestsContract.PetEntry.COLUMN_PET_NAME + "\n");
+
+            // Figure out the index of each column
+            int idColumnIndex = cursor.getColumnIndex(PestsContract.PetEntry._ID);
+            int nameColumnIndex = cursor.getColumnIndex(PestsContract.PetEntry.COLUMN_PET_NAME);
+
+            // Iterate through all the returned rows in the cursor
+            while (cursor.moveToNext()) {
+                // Use that index to extract the String or Int value of the word
+                // at the current row the cursor is on.
+                int currentID = cursor.getInt(idColumnIndex);
+                String currentName = cursor.getString(nameColumnIndex);
+                // Display the values from each column of the current row in the cursor in the TextView
+                displayView.append(("\n" + currentID + " - " +
+                        currentName));
+            }
         } finally {
             // Always close the cursor when you're done reading from it. This releases all its
             // resources and makes it invalid.
