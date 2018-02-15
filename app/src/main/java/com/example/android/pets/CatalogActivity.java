@@ -97,13 +97,10 @@ public class CatalogActivity extends AppCompatActivity {
      */
     private void displayDatabaseInfo() {
 
-
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getReadableDatabase();
-
-        // Perform this raw SQL query "SELECT * FROM pets"
-        Cursor cursor = db.query( PestsContract.PetEntry.TABLE_NAME,null,null,null,null,null,null);
-
+        Cursor cursor = getContentResolver().query(
+                PestsContract.PetEntry.CONTENT_URI,
+                null,null,null,null
+        );
         TextView displayView = (TextView) findViewById(R.id.text_view_pet);
 
         try {
