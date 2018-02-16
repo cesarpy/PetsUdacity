@@ -83,14 +83,6 @@ public class PetProvider extends ContentProvider {
         return cursor;
     }
 
-    /**
-     * Returns the MIME type of data for the content URI.
-     */
-    @Nullable
-    @Override
-    public String getType(@NonNull Uri uri) {
-        return null;
-    }
 
     @Nullable
     @Override
@@ -143,6 +135,28 @@ public class PetProvider extends ContentProvider {
     }
 
 
+    /**
+     * Returns the MIME type of data for the content URI.
+     */
+    @Nullable
+    @Override
+    public String getType(@NonNull Uri uri) {
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return PetEntry.CONTENT_LIST_TYPE;
+            case PETS_ID:
+                return PetEntry.CONTENT_ITEM_TYPE;
+            default:
+                throw new IllegalStateException("Unknown URI " + uri + " with match " + match);
+        }
+    }
+
+
+    /**
+     *
+     * Helpers
+     */
 
 
     /**
