@@ -18,11 +18,10 @@ package com.example.android.pets;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -130,9 +129,6 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
     private void addDummyPet(){
-        // Create and/or open a database to read from it
-        SQLiteDatabase db = mDbHelper.getWritableDatabase();
-
 
         ContentValues values = new ContentValues();
         values.put(PestsContract.PetEntry.COLUMN_PET_NAME, "toto");
@@ -140,11 +136,6 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PestsContract.PetEntry.COLUMN_PET_GENDER, "fsdfdf");
         values.put(PestsContract.PetEntry.COLUMN_PET_WEIGHT, "fdfdfd");
 
-        long newRowId = db.insert(PestsContract.PetEntry.TABLE_NAME, null, values);
-        if(newRowId > 0){
-            Log.d(TAG, "Insertado correctamente");
-        }else {
-            Log.d(TAG, "Insertado con error");
-        }
+        Uri newUri = getContentResolver().insert(PestsContract.PetEntry.CONTENT_URI,values);
     }
 }

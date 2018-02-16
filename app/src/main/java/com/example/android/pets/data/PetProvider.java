@@ -9,6 +9,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by Cesar on 15/2/2018.
@@ -86,7 +87,13 @@ public class PetProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
-        return null;
+        final int match = sUriMatcher.match(uri);
+        switch (match) {
+            case PETS:
+                return insertPet(uri, values);
+            default:
+                throw new IllegalArgumentException("Insertion is not supported for " + uri);
+        }
     }
 
     @Override
@@ -104,9 +111,25 @@ public class PetProvider extends ContentProvider {
     static {
 
         sUriMatcher.addURI(PestsContract.CONTENT_AUTHORITY, PestsContract.PATH_PETS, PETS);
-
-
         sUriMatcher.addURI(PestsContract.CONTENT_AUTHORITY, PestsContract.PATH_PETS+"/#", PETS_ID);
+    }
+
+    /**
+     * Insert a pet into the database with the given content values. Return the new content URI
+     * for that specific row in the database.
+     */
+    private Uri insertPet(Uri uri, ContentValues values) {
+        // Create and/or open a database to read from it
+        SQLiteDatabase db = mPetHelper.getWritableDatabase();
+        Long id = db.insert(PestsContract.PetEntry.TABLE_NAME, null, values);
+        if (id == -1) {
+            Log.e(LOG_TAG, "Failed to insert row for " + uri);
+            return null;
+        }
+
+        // Once we know the ID of the new row in the table,
+        // return the new URI with the ID appended to the end of it
+        return ContentUris.withAppendedId(uri, id);
     }
 
 }
