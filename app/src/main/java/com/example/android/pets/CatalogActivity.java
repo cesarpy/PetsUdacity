@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -103,7 +104,7 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
-                // Do nothing for now
+                deleteAllPets();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -116,10 +117,15 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         ContentValues values = new ContentValues();
         values.put(PestsContract.PetEntry.COLUMN_PET_NAME, "toto");
         values.put(PestsContract.PetEntry.COLUMN_PET_BREED, "df");
-        values.put(PestsContract.PetEntry.COLUMN_PET_GENDER, "fsdfdf");
-        values.put(PestsContract.PetEntry.COLUMN_PET_WEIGHT, "fdfdfd");
+        values.put(PestsContract.PetEntry.COLUMN_PET_GENDER, "1");
+        values.put(PestsContract.PetEntry.COLUMN_PET_WEIGHT, "25");
 
         Uri newUri = getContentResolver().insert(PestsContract.PetEntry.CONTENT_URI,values);
+    }
+
+    private void deleteAllPets() {
+        int rowsDeleted = getContentResolver().delete(PestsContract.PetEntry.CONTENT_URI, null, null);
+        Log.v("CatalogActivity", rowsDeleted + " rows deleted from pet database");
     }
 
     @Override
