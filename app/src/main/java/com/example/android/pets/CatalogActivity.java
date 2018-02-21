@@ -15,16 +15,21 @@
  */
 package com.example.android.pets;
 
+import android.app.LoaderManager;
 import android.content.ContentValues;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.android.pets.data.DbManager;
@@ -33,13 +38,13 @@ import com.example.android.pets.data.PestsContract;
 /**
  * Displays list of pets that were entered and stored in the app.
  */
-public class CatalogActivity extends AppCompatActivity {
+public class CatalogActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String  TAG = CatalogActivity.class.getName();
 
-    // To access our database, we instantiate our subclass of SQLiteOpenHelper
-    // and pass the context, which is the current activity.
-    DbManager mDbHelper = new DbManager(this);
+    // This is the Adapter being used to display the list's data
+    PetCursorAdapter mAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,12 +61,18 @@ public class CatalogActivity extends AppCompatActivity {
             }
         });
 
-    }
+        ListView listView = (ListView) findViewById(R.id.pet_list);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        displayDatabaseInfo();
+        mAdapter = new PetCursorAdapter(this,null);
+        listView.setAdapter(mAdapter);
+
+        // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
+        View emptyView = findViewById(R.id.empty_view);
+        listView.setEmptyView(emptyView);
+
+        getLoaderManager().initLoader(0, null, this);
+
+
     }
 
     @Override
@@ -79,7 +90,6 @@ public class CatalogActivity extends AppCompatActivity {
             // Respond to a click on the "Insert dummy data" menu option
             case R.id.action_insert_dummy_data:
                 addDummyPet();
-                displayDatabaseInfo();
                 return true;
             // Respond to a click on the "Delete all entries" menu option
             case R.id.action_delete_all_entries:
@@ -90,43 +100,6 @@ public class CatalogActivity extends AppCompatActivity {
     }
 
 
-    /**
-     * Temporary helper method to display information in the onscreen TextView about the state of
-     * the pets database.
-     */
-    private void displayDatabaseInfo() {
-
-        Cursor cursor = getContentResolver().query(
-                PestsContract.PetEntry.CONTENT_URI,
-                null,null,null,null
-        );
-        TextView displayView = (TextView) findViewById(R.id.text_view_pet);
-
-        try {
-            displayView.setText("The pets table contains " + cursor.getCount() + " pets.\n\n");
-            displayView.append(PestsContract.PetEntry._ID + " - " +
-                    PestsContract.PetEntry.COLUMN_PET_NAME + "\n");
-
-            // Figure out the index of each column
-            int idColumnIndex = cursor.getColumnIndex(PestsContract.PetEntry._ID);
-            int nameColumnIndex = cursor.getColumnIndex(PestsContract.PetEntry.COLUMN_PET_NAME);
-
-            // Iterate through all the returned rows in the cursor
-            while (cursor.moveToNext()) {
-                // Use that index to extract the String or Int value of the word
-                // at the current row the cursor is on.
-                int currentID = cursor.getInt(idColumnIndex);
-                String currentName = cursor.getString(nameColumnIndex);
-                // Display the values from each column of the current row in the cursor in the TextView
-                displayView.append(("\n" + currentID + " - " +
-                        currentName));
-            }
-        } finally {
-            // Always close the cursor when you're done reading from it. This releases all its
-            // resources and makes it invalid.
-            cursor.close();
-        }
-    }
 
     private void addDummyPet(){
 
@@ -137,5 +110,33 @@ public class CatalogActivity extends AppCompatActivity {
         values.put(PestsContract.PetEntry.COLUMN_PET_WEIGHT, "fdfdfd");
 
         Uri newUri = getContentResolver().insert(PestsContract.PetEntry.CONTENT_URI,values);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String[] p ={PestsContract.PetEntry._ID, PestsContract.PetEntry.COLUMN_PET_NAME, PestsContract.PetEntry.COLUMN_PET_BREED};
+        // Now create and return a CursorLoader that will take care of
+        // creating a Cursor for the data being displayed.
+        return new CursorLoader(this, PestsContract.PetEntry.CONTENT_URI,
+                p,
+                null, null, null);
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        // Swap the new cursor in.  (The framework will take care of closing the
+        // old cursor once we return.)
+        mAdapter.swapCursor(data);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        // This is called when the last Cursor provided to onLoadFinished()
+        // above is about to be closed.  We need to make sure we are no
+        // longer using it.
+        mAdapter.swapCursor(null);
+
     }
 }
