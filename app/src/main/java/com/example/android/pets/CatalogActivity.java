@@ -16,6 +16,7 @@
 package com.example.android.pets;
 
 import android.app.LoaderManager;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -34,6 +35,8 @@ import android.widget.TextView;
 
 import com.example.android.pets.data.DbManager;
 import com.example.android.pets.data.PestsContract;
+
+import java.net.URI;
 
 /**
  * Displays list of pets that were entered and stored in the app.
@@ -69,6 +72,13 @@ public class CatalogActivity extends AppCompatActivity implements LoaderManager.
         // Find and set empty view on the ListView, so that it only shows when the list has 0 items.
         View emptyView = findViewById(R.id.empty_view);
         listView.setEmptyView(emptyView);
+
+        listView.setOnItemClickListener((parent, view, position, id) -> {
+            Intent editIntent = new Intent(CatalogActivity.this, EditorActivity.class);
+            editIntent.setData(ContentUris.withAppendedId(PestsContract.PetEntry.CONTENT_URI,id));
+
+            startActivity(editIntent);
+        });
 
         getLoaderManager().initLoader(0, null, this);
 
