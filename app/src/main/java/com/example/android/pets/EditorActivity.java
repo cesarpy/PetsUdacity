@@ -87,6 +87,8 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         }else{
             onUpdate = true;
             setTitle(getString(R.string.editor_activity_title_edit_pet));
+
+            getLoaderManager().initLoader(1, null, this);
         }
 
         // Find all relevant views that we will need to read user input from
@@ -97,7 +99,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
 
         setupSpinner();
 
-        getLoaderManager().initLoader(1, null, this);
+
     }
 
     /**
